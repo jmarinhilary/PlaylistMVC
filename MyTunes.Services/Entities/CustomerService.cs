@@ -6,13 +6,14 @@ namespace MyTunes.Services.Entities
 {
     public class CustomerService : IDisposable
     {
-        private CustomerRepository _customerRepository;
-        private ChinookContext _chinookContext;
-        public CustomerService()
+        private IRepository<Customer> _customerRepository;
+
+
+        public CustomerService(IRepository<Customer> customerRepository)
         {
-            _chinookContext = new ChinookContext();
-            _customerRepository = new CustomerRepository(_chinookContext);
+            this._customerRepository = customerRepository;
         }
+
         public void Create(Common.ViewModels.CustomerViewModel customerViewModel)
         {
             // customerViewModel -> Customer
@@ -24,12 +25,10 @@ namespace MyTunes.Services.Entities
             };
             // Tratamiento de Errores, traducir el error para UI
             _customerRepository.Create(customer);
-            
         }
 
-        public void Dispose() 
+        public void Dispose()
         {
-            _chinookContext = null;
             _customerRepository = null;
         }
     }

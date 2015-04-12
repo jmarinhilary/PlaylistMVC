@@ -13,8 +13,8 @@ namespace IdentitySample
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
                         "~/Scripts/jquery.validate*"));
 
-            bundles.Add(new ScriptBundle("~/bundles/app").Include(
-                        "~/Scripts/app/*.js"));
+            //bundles.Add(new ScriptBundle("~/bundles/app").Include(
+            //            "~/Scripts/app/*.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/unobtrusive").Include(
                 "~/Scripts/jquery.unobtrusive-ajax.js",

@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Security;
+using MyTunes.TokensProvider;
 
 namespace IdentitySample.Models
 {
@@ -20,6 +22,8 @@ namespace IdentitySample.Models
         public ApplicationUserManager(IUserStore<ApplicationUser> store)
             : base(store)
         {
+            var provider = new MachineKeyProtectionProvider();
+            this.UserTokenProvider = new DataProtectorTokenProvider<ApplicationUser>(provider.Create("ASP.NET Identity"));
         }
 
         public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options,

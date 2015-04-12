@@ -9,7 +9,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-
 using MyTunes.Services;
 using MyTunes.Services.Entities;
 using MyTunes.Common.ViewModels;
@@ -19,14 +18,12 @@ namespace IdentitySample.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-        public AccountController()
-        {
-        }
 
-        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
+        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager, CustomerService customerService)
         {
             UserManager = userManager;
             SignInManager = signInManager;
+            this._customerService = customerService;
         }
 
         private ApplicationUserManager _userManager;
@@ -159,7 +156,6 @@ namespace IdentitySample.Controllers
                 {
                     // Asignar el rol Cliente al USuario
                     result = await UserManager.AddToRolesAsync(user.Id, "Cliente");
-                    var _customerService = new CustomerService();
                     _customerService.Create(
                         new CustomerViewModel
                         {
@@ -418,7 +414,7 @@ namespace IdentitySample.Controllers
         #region Helpers
         // Used for XSRF protection when adding external logins
         private const string XsrfKey = "XsrfId";
-
+        private CustomerService _customerService;
         private IAuthenticationManager AuthenticationManager
         {
             get

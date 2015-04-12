@@ -1,5 +1,9 @@
 using System.Net.Sockets;
 using System.Web.Mvc;
+using IdentitySample.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.Owin.Security;
 using MyTunes.Repository;
 using Ninject.Web.Mvc;
 
@@ -48,16 +52,26 @@ namespace MyTunes.App_Start
             {
                 kernel.Bind<Func<IKernel>>().ToMethod(ctx => () => new Bootstrapper().Kernel);
                 kernel.Bind<IHttpModule>().To<HttpApplicationInitializationHttpModule>();
-
                 kernel.Bind(
                     x => x.FromAssemblyContaining<PlayListRepository>()
                         .SelectAllClasses()
                         .WhichAreNotGeneric()
-                        .InheritedFrom(typeof(IRepository<>))
+                        .InheritedFrom(typeof (IRepository<>))
                         .BindAllInterfaces()
                     );
 
                 kernel.Bind<ChinookContext>().ToSelf().InRequestScope();
+                //Configuracion para Identity
+                kernel.Bind<ApplicationDbContext>().ToSelf().InRequestScope();
+                kernel.Bind<IUserStore<ApplicationUser>>()
+                    .To<UserStore<ApplicationUser>>()
+                    .InRequestScope()
+                    .WithConstructorArgument("context", kernel.Get<ApplicationDbContext>());
+                kernel.Bind<UserManager<ApplicationUser>>().ToSelf().InRequestScope();
+                kernel.Bind<IAuthenticationManager>().ToMethod(
+                    m => HttpContext.Current.GetOwinContext().Authentication
+                    ).InRequestScope();
+
                 //Extra
                 DependencyResolver.SetResolver(new NinjectDependencyResolver(kernel));
 
