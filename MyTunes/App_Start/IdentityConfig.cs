@@ -8,9 +8,13 @@ using Microsoft.Owin.Security;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Net;
+using System.Net.Mail;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Security;
+using MyTunes.Dominio;
 using MyTunes.TokensProvider;
 
 namespace IdentitySample.Models
@@ -24,6 +28,17 @@ namespace IdentitySample.Models
         {
             var provider = new MachineKeyProtectionProvider();
             this.UserTokenProvider = new DataProtectorTokenProvider<ApplicationUser>(provider.Create("ASP.NET Identity"));
+            this.EmailService = new EmailService();
+            this.SmsService = new SmsService();
+            this.RegisterTwoFactorProvider("PhoneCode", new PhoneNumberTokenProvider<ApplicationUser>
+            {
+                MessageFormat = "Your security code is: {0}"
+            });
+            this.RegisterTwoFactorProvider("EmailCode", new EmailTokenProvider<ApplicationUser>
+            {
+                Subject = "SecurityCode",
+                BodyFormat = "Your security code is {0}"
+            });
         }
 
         public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options,
@@ -51,15 +66,7 @@ namespace IdentitySample.Models
             manager.MaxFailedAccessAttemptsBeforeLockout = 5;
             // Register two factor authentication providers. This application uses Phone and Emails as a step of receiving a code for verifying the user
             // You can write your own provider and plug in here.
-            manager.RegisterTwoFactorProvider("PhoneCode", new PhoneNumberTokenProvider<ApplicationUser>
-            {
-                MessageFormat = "Your security code is: {0}"
-            });
-            manager.RegisterTwoFactorProvider("EmailCode", new EmailTokenProvider<ApplicationUser>
-            {
-                Subject = "SecurityCode",
-                BodyFormat = "Your security code is {0}"
-            });
+
             manager.EmailService = new EmailService();
             manager.SmsService = new SmsService();
             var dataProtectionProvider = options.DataProtectionProvider;
@@ -90,6 +97,16 @@ namespace IdentitySample.Models
     {
         public Task SendAsync(IdentityMessage message)
         {
+            var msg = new MailMessage();
+            msg.From = new MailAddress("yonosehace@hotmail.com","MyTunes Support");
+            msg.To.Add(new MailAddress(message.Destination));
+            msg.Subject = message.Subject;
+            msg.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(message.Body,null,MediaTypeNames.Text.Plain));
+            msg.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(message.Body, null, MediaTypeNames.Text.Html));
+            var smtpCliente = new SmtpClient("smtp-mail.outlook.com", 587);
+            smtpCliente.Credentials = new NetworkCredential("yonosehace@hotmail.com", "S0p0rt3idat");
+            smtpCliente.EnableSsl = true;
+            smtpCliente.Send(msg);
             // Plug in your email service here to send an email.
             return Task.FromResult(0);
         }

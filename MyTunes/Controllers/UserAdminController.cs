@@ -16,9 +16,6 @@ namespace IdentitySample.Controllers
     [Authorize(Roles = "Admin")]
     public class UsersAdminController : Controller
     {
-        public UsersAdminController()
-        {
-        }
 
         public UsersAdminController(ApplicationUserManager userManager, ApplicationRoleManager roleManager)
         {

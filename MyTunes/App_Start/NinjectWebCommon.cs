@@ -68,9 +68,16 @@ namespace MyTunes.App_Start
                     .InRequestScope()
                     .WithConstructorArgument("context", kernel.Get<ApplicationDbContext>());
                 kernel.Bind<UserManager<ApplicationUser>>().ToSelf().InRequestScope();
+
                 kernel.Bind<IAuthenticationManager>().ToMethod(
                     m => HttpContext.Current.GetOwinContext().Authentication
                     ).InRequestScope();
+
+                kernel.Bind<IRoleStore<IdentityRole, string>>()
+                    .To<RoleStore<IdentityRole>>()
+                    .InRequestScope()
+                    .WithConstructorArgument("context", kernel.Get<ApplicationDbContext>());
+                kernel.Bind<RoleManager<IdentityRole>>().ToSelf().InRequestScope();
 
                 //Extra
                 DependencyResolver.SetResolver(new NinjectDependencyResolver(kernel));
